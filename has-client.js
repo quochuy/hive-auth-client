@@ -30,10 +30,10 @@ class HasClient {
   /**
    * Class constructor
    * @param {string} host
-   * @param {string} auth_key_secret
+   * @param {string} authKeySecret
    * @param {boolean} debug
    */
-  constructor(host, auth_key_secret = '', debug = false) {
+  constructor(host, authKeySecret = '', debug = false) {
     this.websocket = undefined;
     this.websocketConnectionCheckDelay = 250;
     this.timeout = undefined;
@@ -41,7 +41,7 @@ class HasClient {
     this.debug = debug;
     this.config = {
       host: `wss://${host}/`,
-      auth_key_secret: auth_key_secret,
+      auth_key_secret: authKeySecret,
     };
     this.eventHandlers = {
       AttachFailure: [],

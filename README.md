@@ -155,3 +155,59 @@ const challengeData = {
 
 client.challenge(authData, challengeData);
 ```
+
+## Methods available
+constructor(host, authKeySecret, debug)
+- @param {string} host
+- @param {string} authKeySecret
+- @param {boolean} debug
+
+authenticate(authData, appData, challengeData)
+- @param {Object} authData
+- @param {string} authData.username
+- @param {string=} authData.token
+- @param {number=} authData.expire
+- @param {string=} authData.key
+- @param {Object} appData
+- @param {string} appData.name - Application name
+- @param {string} appData.description - Application description
+- @param {string} appData.icon - URL of application icon
+- @param {Object} challengeData
+- @param {string} challengeData.key_type
+- @param {Object} challengeData.challenge
+
+broadcast(authData, keyType, ops)
+- @param {Object} authData
+- @param {string} authData.username
+- @param {string=} authData.token
+- @param {number=} authData.expire
+- @param {string=} authData.key
+- @param {string} keyType
+- @param {Array} ops
+
+challenge(authData, challengeData)
+- @param {Object} authData
+- @param {string} authData.username
+- @param {string=} authData.token
+- @param {number=} authData.expire
+- @param {string=} authData.key
+- @param {Object} challengeData
+- @param {string} challengeData.key_type
+- @param {Object} challengeData.challenge
+
+## Events
+- AttachFailure
+- AttachSuccess
+- AuthPending
+- AuthSuccess
+- AuthFailure
+- SignPending
+- SignSuccess
+- SignFailure
+- SignError
+- ChallengePending
+- ChallengeSuccess
+- ChallengeFailure
+- ChallengeError
+- Error
+- RequestExpired
