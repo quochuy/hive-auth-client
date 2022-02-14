@@ -1,0 +1,17 @@
+{
+  "name": "hive-auth-client",
+  "version": "0.1.0",
+  "description": "Event based client for Hive Authentication Services",
+  "main": "has-client.js",
+  "author": "Quoc Huy Nguyen Dinh",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quochuy/hive-auth-client.git"
+  },
+  "homepage": "https://github.com/quochuy/hive-auth-client",
+  "dependencies": {
+    "crypto-js": "^4.1.1",
+    "lodash": "^4.17.21"
+  }
+}
