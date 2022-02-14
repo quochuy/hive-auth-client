@@ -58,6 +58,7 @@ class HasClient {
       ChallengeFailure: [],
       ChallengeError: [],
       Error: [],
+      RequestExpired: [],
     };
     this.messages = [];
     this.uuid = '';
@@ -90,7 +91,7 @@ class HasClient {
    * @param {string} event.message
    */
   /**
-   * Add a handler function for HAS websocket message events
+   * Adds a handler function for HAS websocket message events
    * @param {string} eventName
    * @param {eventHandler} handlerFunction
    */
@@ -110,6 +111,30 @@ class HasClient {
       }
     }
   }
+
+  /**
+   * @callback eventHandler
+   * @param {Object} event
+   * @param {string} event.message
+   */
+  /**
+   * Removes a handler function for HAS websocket message events
+   * @param {string} eventName
+   * @param {eventHandler} handlerFunction
+   */
+  removeEventHandler(eventName, handlerFunction) {
+    if (this.eventHandlers) {
+      for (let hi = 0; hi < this.eventHandlers[eventName].length; hi += 1) {
+        const handler = this.eventHandlers[eventName][hi];
+        const matching = handler === handlerFunction;
+        if (matching) {
+          // Setting to null instead of deleting the element from the array
+          // as this can break the loop from dispatchEvent() above
+          this.eventHandlers[eventName][hi] = undefined;
+        }
+      }
+    }
+  };
 
   /**
    * Dispatch HAS websocket message events
@@ -156,7 +181,7 @@ class HasClient {
     }
 
     this.expireCheckTimeoutId = setTimeout(() => {
-      this.dispatchEvent('AuthFailure', { message: 'expired' });
+      this.dispatchEvent('RequestExpired', { message: 'expired' });
     }, expireDiff);
   }
 
