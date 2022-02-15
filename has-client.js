@@ -30,8 +30,8 @@ class HasClient {
   /**
    * Class constructor
    * @param {string} host
-   * @param {string} authKeySecret
-   * @param {boolean} debug
+   * @param {string=} authKeySecret
+   * @param {boolean=} debug
    */
   constructor(host, authKeySecret = '', debug = false) {
     this.websocket = undefined;
@@ -44,6 +44,8 @@ class HasClient {
       auth_key_secret: authKeySecret,
     };
     this.eventHandlers = {
+      ConnectionSuccess: [],
+      ConnectionFailure: [],
       AttachFailure: [],
       AttachSuccess: [],
       AuthPending: [],
@@ -71,18 +73,20 @@ class HasClient {
    * Console.log wrapper
    */
   log() {
-    const now = new Date().toLocaleString();
+    if (this.debug === true) {
+      const now = new Date().toLocaleString();
 
-    if (typeof arguments.unshift === 'undefined') {
+      if (typeof arguments.unshift === 'undefined') {
+        // eslint-disable-next-line prefer-rest-params
+        arguments[0] = `${now} HAS Client: ${arguments[0]}`;
+      } else {
+        arguments.unshift(now);
+        arguments.unshift('HAS Client');
+      }
+
       // eslint-disable-next-line prefer-rest-params
-      arguments[0] = `${now} HAS Client: ${arguments[0]}`;
-    } else {
-      arguments.unshift(now);
-      arguments.unshift('HAS Client');
+      console.log.apply(null, arguments);
     }
-
-    // eslint-disable-next-line prefer-rest-params
-    console.log.apply(null, arguments);
   }
 
   /**
@@ -130,7 +134,7 @@ class HasClient {
         if (matching) {
           // Setting to null instead of deleting the element from the array
           // as this can break the loop from dispatchEvent() above
-          this.eventHandlers[eventName][hi] = undefined;
+          this.eventHandlers[eventName].splice(hi, 1);
         }
       }
     }
@@ -148,7 +152,7 @@ class HasClient {
 
       for (let hi = 0; hi < this.eventHandlers[eventName].length; hi += 1) {
         const eventHandler = this.eventHandlers[eventName][hi];
-        if (eventHandler !== null) {
+        if (typeof eventHandler === 'function') {
           eventHandler(event);
         }
       }
@@ -196,9 +200,11 @@ class HasClient {
         case CMD.CONNECTED:
           this.timeout = message.timeout * 1000;
           if(message.protocol > HAS_PROTOCOL) {
-            console.error('HAS Client:unsupported HAS protocol');
+            this.log('unsupported HAS protocol');
+            this.dispatchEvent('ConnectionFailure', { message });
           } else {
-            this.log('has successfully connected');
+            this.log('successfully connected');
+            this.dispatchEvent('ConnectionSuccess', { message });
           }
           break;
 
@@ -243,12 +249,12 @@ class HasClient {
           break;
 
         case CMD.ATTACH_ACK:
-          this.dispatchEvent('AttachSuccess', message);
+          this.dispatchEvent('AttachSuccess', { message });
           this.clearExpireTimeout();
           break;
 
         case CMD.ATTACH_NACK:
-          this.dispatchEvent('AttachFailure', message);
+          this.dispatchEvent('AttachFailure', { message });
           this.clearExpireTimeout();
           break;
 
@@ -275,8 +281,8 @@ class HasClient {
           break;
 
         case CMD.SIGN_ERR:
-          error = CryptoJS.AES.decrypt(message.error, this.authKey).toString(CryptoJS.enc.Utf8);
-          this.dispatchEvent('Error', { error });
+          error = JSON.parse(CryptoJS.AES.decrypt(message.error, this.authKey).toString(CryptoJS.enc.Utf8));
+          this.dispatchEvent('Error', error);
           this.clearExpireTimeout();
           break;
 
@@ -306,20 +312,19 @@ class HasClient {
           break;
 
         case CMD.CHALLENGE_ERR:
-          error = CryptoJS.AES.decrypt(message.error, this.authKey).toString(CryptoJS.enc.Utf8)
+          error = CryptoJS.AES.decrypt(message.error, this.authKey).toString(CryptoJS.enc.Utf8);
           this.dispatchEvent('Error', { error });
           this.clearExpireTimeout();
           break;
 
         default:
-          console.log('Generic message', message);
-          this.messages.push(message);
+          this.log('Unknown message');
           break;
       }
     }
   }
 
-  processWebsocketOpen(event) {
+  processWebsocketOpen() {
     // Web Socket is connected
     this.isConnected = true;
     if(this.debug) {
@@ -419,7 +424,7 @@ class HasClient {
         this.log('IS NOW CONNECTED');
       }
     } else {
-      console.log('Already connected');
+      this.log('Already connected');
     }
 
     return true;
@@ -507,8 +512,6 @@ class HasClient {
     };
     if(this.config.auth_key_secret) {
       // Encrypt auth_key before sending it to the HAS
-      console.log('this.authKey', this.authKey);
-      console.log('this.config', this.config);
       payload.auth_key = CryptoJS.AES.encrypt(this.authKey, this.config.auth_key_secret).toString();
     }
 

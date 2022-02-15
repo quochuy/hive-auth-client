@@ -196,6 +196,8 @@ challenge(authData, challengeData)
 - @param {Object} challengeData.challenge
 
 ## Events
+- ConnectionSuccess
+- ConnectionFailure
 - AttachFailure
 - AttachSuccess
 - AuthPending
