@@ -19,6 +19,7 @@ test('Constructor sets parameters', () => {
     auth_key_secret: 'mysecret',
   });
   expect(client.debug).toBe(true);
+  expect(client.timeout).toBe(60000);
 });
 
 test('Adds, calls and removes event handlers', () => {
@@ -65,9 +66,10 @@ test('Processes websocket messages', () => {
   const client = new HasClient('myhost', '', false);
   client.dispatchEvent = jest.fn();
 
-  let message = '{"cmd": "connected", "protocol": 0.8}';
+  let message = '{"cmd": "connected", "protocol": 0.8, "timeout": 120}';
   client.processWebsocketMessage({ data: message });
   expect(client.dispatchEvent).toHaveBeenCalledWith('ConnectionSuccess', { message: JSON.parse(message) });
+  expect(client.timeout).toBe(120000);
 
   client.dispatchEvent.mockClear();
   message = '{ "cmd": "connected", "protocol": 0.9 }';
