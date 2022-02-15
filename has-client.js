@@ -36,7 +36,7 @@ class HasClient {
   constructor(host, authKeySecret = '', debug = false) {
     this.websocket = undefined;
     this.websocketConnectionCheckDelay = 250;
-    this.timeout = undefined;
+    this.timeout = HAS_DEFAULT_REQUEST_TIMEOUT;
     this.isConnected = false;
     this.debug = debug;
     this.config = {
@@ -386,7 +386,7 @@ class HasClient {
 
     const payload = { cmd: CMD.ATTACH_REQ, uuid: this.uuid };
     this.send(JSON.stringify(payload));
-    this.currentRequestExpire = new Date().getTime() + HAS_DEFAULT_REQUEST_TIMEOUT;
+    this.currentRequestExpire = new Date().getTime() + this.timeout;
     this.setExpireTimeout();
   }
 
@@ -516,7 +516,7 @@ class HasClient {
     }
 
     this.send(JSON.stringify(payload));
-    this.currentRequestExpire = new Date().getTime() + HAS_DEFAULT_REQUEST_TIMEOUT;
+    this.currentRequestExpire = new Date().getTime() + this.timeout;
     this.setExpireTimeout();
   }
 
@@ -538,7 +538,7 @@ class HasClient {
     const data = CryptoJS.AES.encrypt(JSON.stringify({ key_type: keyType, ops, broadcast: true }), authData.key).toString();
     const payload = { cmd: CMD.SIGN_REQ, account: authData.username, token: authData.token, data };
     this.send(JSON.stringify(payload));
-    this.currentRequestExpire = new Date().getTime() + HAS_DEFAULT_REQUEST_TIMEOUT;
+    this.currentRequestExpire = new Date().getTime() + this.timeout;
     this.setExpireTimeout();
   }
 
@@ -561,7 +561,7 @@ class HasClient {
     const data = CryptoJS.AES.encrypt(JSON.stringify(challengeData), authData.key).toString();
     const payload = { cmd: CMD.CHALLENGE_REQ, account:authData.username, token: authData.token, data };
     this.send(JSON.stringify(payload));
-    this.currentRequestExpire = new Date().getTime() + HAS_DEFAULT_REQUEST_TIMEOUT;
+    this.currentRequestExpire = new Date().getTime() + this.timeout;
     this.setExpireTimeout();
   }
 }
